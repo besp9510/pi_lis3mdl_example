@@ -47,3 +47,22 @@ test_lis3mdl.c is a test script to check and see the I2C library working on your
 5. Select operating mode
 6. Get measurement status
 7. Read magnetic field data in a loop
+
+## Contributing
+Follow the "fork-and-pull" Git workflow.
+1. Fork the repo on GitHub
+2. Clone the project to your own machine
+3. Commit changes to your own branch
+4. Push your work back up to your fork
+5. Submit a Pull request so that your changes can be reviewed
+
+Be sure to merge the latest from "upstream" before making a pull request!
+
+Feel free to email at the email address under my account name if you have any questions.
+## Authors
+
+Benjamin Spencer
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
