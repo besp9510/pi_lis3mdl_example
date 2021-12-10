@@ -55,7 +55,7 @@ INCDEP  := -I$(INCDIR)
 MACRO := $(DEBUG_LOG)
 
 # Find source and object files:
-SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+SOURCES := $(shell find $(SRCDIR) -type f -name "*.$(SRCEXT)")
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,\
 	$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
 
