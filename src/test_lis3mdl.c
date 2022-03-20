@@ -93,8 +93,8 @@ int i2c_error_handler(int errno) {
             // Try rebooting device:
             reboot_device();
             break;
-        case -ESLAVEHUNG:
-            printf("I2C Error! Encountered ESLAVEHUNG\n");
+        case -EDEVICEHUNG:
+            printf("I2C Error! Encountered EDEVICEHUNG\n");
             // Try rebooting device:
             reboot_device();
             break;
@@ -105,7 +105,7 @@ int i2c_error_handler(int errno) {
     return 0;
 }
 
-int scan_for_device(uint8_t slave_address) {
+int scan_for_device(uint8_t device_address) {
     // Address book passed to returned by the function:
     int address_book[127];
 
@@ -117,24 +117,24 @@ int scan_for_device(uint8_t slave_address) {
 
     // Check and see if LIS3MDL was detected on the bus (if not then we can't
     // really continue with the test):
-    if (address_book[slave_address] != 1) {
-        printf("Device was not detected at 0x%X\n", slave_address);
+    if (address_book[device_address] != 1) {
+        printf("Device was not detected at 0x%X\n", device_address);
         return -1;
     };
 
-    printf("Device was detected at 0x%X\n", slave_address);
+    printf("Device was detected at 0x%X\n", device_address);
 
     return 0;
 }
 
-int verify_device_id(uint8_t slave_address) {
+int verify_device_id(uint8_t device_address) {
     // The returned device ID will be stored into an array that we pass
     // to the read function:
     int device_id[1];
 
     int ret;
 
-    if ((ret = read_i2c(slave_address, WHO_AM_I, device_id, 0x01)) < 0) {
+    if ((ret = read_i2c(device_address, WHO_AM_I, device_id, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
@@ -152,7 +152,7 @@ int verify_device_id(uint8_t slave_address) {
     return 0;
 }
 
-int configure_device(uint8_t slave_address, int xy_ops_mode, int z_ops_mode,
+int configure_device(uint8_t device_address, int xy_ops_mode, int z_ops_mode,
                      int data_rate, int sensitivity) {
     // Device settings will be retrieved, stored, and modified in an array
     // that will be passed to read and write:
@@ -166,15 +166,15 @@ int configure_device(uint8_t slave_address, int xy_ops_mode, int z_ops_mode,
 
     printf("Reading device control registers\n");
 
-    if ((ret = read_i2c(slave_address, CTRL_REG1, ctrl_reg1_value, 0x01)) < 0) {
+    if ((ret = read_i2c(device_address, CTRL_REG1, ctrl_reg1_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
-    if ((ret = read_i2c(slave_address, CTRL_REG2, ctrl_reg2_value, 0x01)) < 0) {
+    if ((ret = read_i2c(device_address, CTRL_REG2, ctrl_reg2_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
-    if ((ret = read_i2c(slave_address, CTRL_REG4, ctrl_reg4_value, 0x01)) < 0) {
+    if ((ret = read_i2c(device_address, CTRL_REG4, ctrl_reg4_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
@@ -192,15 +192,15 @@ int configure_device(uint8_t slave_address, int xy_ops_mode, int z_ops_mode,
     printf("Setting device configs: ctrl_reg2 = 0x%X\n", ctrl_reg2_value[0]);
     printf("Setting device configs: ctrl_reg4 = 0x%X\n", ctrl_reg4_value[0]);
 
-    if ((ret = write_i2c(slave_address, CTRL_REG1, ctrl_reg1_value, 0x01)) < 0) {
+    if ((ret = write_i2c(device_address, CTRL_REG1, ctrl_reg1_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
-    if ((ret = write_i2c(slave_address, CTRL_REG2, ctrl_reg2_value, 0x01)) < 0) {
+    if ((ret = write_i2c(device_address, CTRL_REG2, ctrl_reg2_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
-    if ((ret = write_i2c(slave_address, CTRL_REG4, ctrl_reg4_value, 0x01)) < 0) {
+    if ((ret = write_i2c(device_address, CTRL_REG4, ctrl_reg4_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
@@ -209,7 +209,7 @@ int configure_device(uint8_t slave_address, int xy_ops_mode, int z_ops_mode,
     return 0;
 }
 
-int select_operating_mode(uint8_t slave_address, int mode) {
+int select_operating_mode(uint8_t device_address, int mode) {
     // Device settings will be retrieved, stored, and modified in an array
     // that will be passed to read and write:
     int ctrl_reg3_value[1] = {0};
@@ -218,7 +218,7 @@ int select_operating_mode(uint8_t slave_address, int mode) {
 
     printf("Configuring operating mode\n");
 
-    if ((ret = read_i2c(slave_address, CTRL_REG3, ctrl_reg3_value, 0x01)) < 0) {
+    if ((ret = read_i2c(device_address, CTRL_REG3, ctrl_reg3_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
@@ -228,7 +228,7 @@ int select_operating_mode(uint8_t slave_address, int mode) {
 
     printf("Setting device configs: ctrl_reg3 = 0x%X\n", ctrl_reg3_value[0]);
 
-    if ((ret = write_i2c(slave_address, CTRL_REG3, ctrl_reg3_value, 0x01)) < 0) {
+    if ((ret = write_i2c(device_address, CTRL_REG3, ctrl_reg3_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
@@ -237,7 +237,7 @@ int select_operating_mode(uint8_t slave_address, int mode) {
     return 0;
 }
 
-int read_mag_data(uint8_t slave_address, int sensitivity, float *mag_nTesla) {
+int read_mag_data(uint8_t device_address, int sensitivity, float *mag_nTesla) {
     int temp[6] = {0, 0, 0, 0, 0, 0};
 
     int16_t mag_x_raw = 0;
@@ -269,7 +269,7 @@ int read_mag_data(uint8_t slave_address, int sensitivity, float *mag_nTesla) {
 
     printf("Reading magnetic field\n");
 
-    if ((ret = read_i2c(slave_address, OUT_X_L, temp, 6)) < 0) {
+    if ((ret = read_i2c(device_address, OUT_X_L, temp, 6)) < 0) {
         i2c_error_handler(ret);
     };
 
@@ -296,7 +296,7 @@ int read_mag_data(uint8_t slave_address, int sensitivity, float *mag_nTesla) {
     return 0;
 }
 
-int get_status(uint8_t slave_address) {
+int get_status(uint8_t device_address) {
     uint8_t status_value[1] = {0};
 
     // Bit fields found in the status register description: 
@@ -313,7 +313,7 @@ int get_status(uint8_t slave_address) {
 
     printf("Reading device status register\n");
 
-    if ((ret = read_i2c(slave_address, STATUS_REG, status_value, 0x01)) < 0) {
+    if ((ret = read_i2c(device_address, STATUS_REG, status_value, 0x01)) < 0) {
         i2c_error_handler(ret);
     };
 
@@ -340,7 +340,7 @@ int get_status(uint8_t slave_address) {
 }
 
 int main(void) {
-    // LIS3MDL slave address (page 17):
+    // LIS3MDL device address (page 17):
     uint8_t lis3mdl_addr = 0x1C;
 
     // Use the default I2C pins:
