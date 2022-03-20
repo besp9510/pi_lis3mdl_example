@@ -48,7 +48,7 @@ OBJEXT := o
 CFLAGS   := -Wall -O0 -g # C flags
 LDFLAGS  :=
 
-LIB     := -lpimicrosleephard -lpilwgpio -lpii2c
+LIB     := -lpii2c -lpimicrosleephard -lpilwgpio
 INC     := -I$(INCDIR)
 INCDEP  := -I$(INCDIR)
 
