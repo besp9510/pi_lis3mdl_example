@@ -100,7 +100,7 @@ int i2c_error_handler(int errno) {
             break;
         default:
             break;
-    };
+    }
 
     return 0;
 }
@@ -113,14 +113,14 @@ int scan_for_device(uint8_t device_address) {
 
     if ((ret = scan_bus_i2c(address_book)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     // Check and see if LIS3MDL was detected on the bus (if not then we can't
     // really continue with the test):
     if (address_book[device_address] != 1) {
         printf("Device was not detected at 0x%X\n", device_address);
         return -1;
-    };
+    }
 
     printf("Device was detected at 0x%X\n", device_address);
 
@@ -136,7 +136,7 @@ int verify_device_id(uint8_t device_address) {
 
     if ((ret = read_i2c(device_address, WHO_AM_I, device_id, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     // Compare returned device ID and error out if it does not match expected
     // (If it doesn't match I would suspect something has gone horribly wrong)
@@ -144,7 +144,7 @@ int verify_device_id(uint8_t device_address) {
         printf("Device identity (0x%X) does not match expected (0x%X)\n",
                device_id[0], WHO_AM_I_DEFALT);
         return -1;
-    };
+    }
 
     printf("Device identity (0x%X) matches expected (0x%X)\n",
             device_id[0], WHO_AM_I_DEFALT);
@@ -168,15 +168,15 @@ int configure_device(uint8_t device_address, int xy_ops_mode, int z_ops_mode,
 
     if ((ret = read_i2c(device_address, CTRL_REG1, ctrl_reg1_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     if ((ret = read_i2c(device_address, CTRL_REG2, ctrl_reg2_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     if ((ret = read_i2c(device_address, CTRL_REG4, ctrl_reg4_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     printf("Current configs: ctrl_reg1 = 0x%X\n", ctrl_reg1_value[0]);
     printf("Current configs: ctrl_reg2 = 0x%X\n", ctrl_reg2_value[0]);
@@ -194,15 +194,15 @@ int configure_device(uint8_t device_address, int xy_ops_mode, int z_ops_mode,
 
     if ((ret = write_i2c(device_address, CTRL_REG1, ctrl_reg1_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     if ((ret = write_i2c(device_address, CTRL_REG2, ctrl_reg2_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     if ((ret = write_i2c(device_address, CTRL_REG4, ctrl_reg4_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     printf("Device configured\n");
 
@@ -220,7 +220,7 @@ int select_operating_mode(uint8_t device_address, int mode) {
 
     if ((ret = read_i2c(device_address, CTRL_REG3, ctrl_reg3_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     printf("Current configs: ctrl_reg3 = 0x%X\n", ctrl_reg3_value[0]);
 
@@ -230,7 +230,7 @@ int select_operating_mode(uint8_t device_address, int mode) {
 
     if ((ret = write_i2c(device_address, CTRL_REG3, ctrl_reg3_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     printf("Device configured\n");
 
@@ -265,13 +265,13 @@ int read_mag_data(uint8_t device_address, int sensitivity, float *mag_nTesla) {
         scale = 3421;
     } else if (sensitivity == SENSITIVITY_4_G) {
         scale = 6842;
-    };
+    }
 
     printf("Reading magnetic field\n");
 
     if ((ret = read_i2c(device_address, OUT_X_L, temp, 6)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     mag_x_raw = (temp[1] << 0x08) | temp[0];
     mag_y_raw = (temp[3] << 0x08) | temp[2];
@@ -315,7 +315,7 @@ int get_status(uint8_t device_address) {
 
     if ((ret = read_i2c(device_address, STATUS_REG, status_value, 0x01)) < 0) {
         i2c_error_handler(ret);
-    };
+    }
 
     // Segregate each bit field:
     zyxor = (status_value[0] & 0x80) >> 7;
@@ -368,18 +368,18 @@ int main(void) {
     if ((ret = config_i2c(sda_pin, scl_pin, speed_grade)) < 0 ) {
         printf("config_i2c() failed to configure and returned %d\n", ret);
         return ret;
-    };
+    }
 
     // Check to see if the device is present prior to interacting with device:
     if ((ret = scan_for_device(lis3mdl_addr)) < 0) {
         return -1;
-    };
+    }
 
     // Check to see if the device ID matches what's expected prior to
     // continuing with the test: 
     if ((ret = verify_device_id(lis3mdl_addr)) < 0) {
         return -1;
-    };
+    }
 
     // Set the following settings:
     // - X, Y, & Z axes high-performance mode
@@ -389,28 +389,28 @@ int main(void) {
                                 Z_AXES_HIGH_PERF, DATA_RATE_10,
                                 SENSITIVITY_4_G)) < 0) {
         return -1;
-    };
+    }
 
     // Set the following settings:
     // - Continous conversion mode
     if ((ret = select_operating_mode(lis3mdl_addr,
                                      CONTINUOUS_CONVERSION_MODE)) < 0) {
         return -1;
-    };
+    }
 
     if ((ret = get_status(lis3mdl_addr)) < 0) {
             return -1;
-    };
+    }
 
     // Loop for some time to get magnetic field readings:
     for (i = 0; i < samples; i++) {
         if ((ret = read_mag_data(lis3mdl_addr,
                                  SENSITIVITY_4_G, mag_nTesla)) < 0) {
             return -1;
-        };
+        }
 
         sleep(1);
-    };
+    }
 
     return 0;
 }
